@@ -1,0 +1,220 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"}]}}
+
+#!csharp
+
+public (string Name, int Number) GetFruit()
+{
+    return ("apples", 5);
+}
+
+var fruit = GetFruit();
+
+(string theName, int theNumber) tupleWithNamedFields = GetFruit();
+ 
+Console.WriteLine($"{fruit.Name}, {fruit.Number}");
+
+#!csharp
+
+Console.WriteLine($"{tupleWithNamedFields.theName}, {tupleWithNamedFields.theNumber}");
+
+#!csharp
+
+// optional parameters
+
+public string OptParams(string command = "run!!",
+                        double number = 0.0,
+                        bool active = true)
+{
+    return $"command is {command}, number is {number}, active is {active}";
+}
+
+var opt = OptParams("jump!!", 99.88);
+
+opt
+
+#!csharp
+
+// parameter control
+
+public void PassParams(int x,
+                       ref int y,
+                       out int z)
+{
+    z = 99;
+    x++;
+    y++;
+    z++;
+}
+
+int a = 10;
+int b = 20;
+int c = 30;
+
+// before
+Console.WriteLine($"a: {a} b: {b} c: {c}");
+
+#!csharp
+
+PassParams(a, ref b, out c);
+
+// after
+Console.WriteLine($"a: {a} b: {b} c: {c}");
+
+#!csharp
+
+int d = 10;
+int e = 20;
+
+//before
+Console.WriteLine($"d: {d} e: {e} f: does not exist yet");
+
+#!csharp
+
+PassParams(d, ref e, out int f);
+
+//after
+Console.WriteLine($"d: {d} e: {e} f: {f}");
+
+#!csharp
+
+//required properties
+using System.Diagnostics.CodeAnalysis;
+
+public class Book
+{
+    public required string Isbn { get; set; }
+    public required string Title { get; set; }
+    public string Author { get; set; }
+    public int PageCount { get; set; }
+
+    public Book() {}
+
+    [SetsRequiredMembers]
+    public Book(string isbn, string title)
+    {
+        Isbn = isbn;
+        Title = title;
+    }
+}
+
+Book book = new(isbn: "999-999000999", title: "Ta so bukvice?")
+{
+    Author = "pepe",
+    PageCount = 1000
+};
+
+public static string DisplayProperties(object obj) // print whole object
+{
+    var sb = new StringBuilder();
+    var props = obj.GetType().GetProperties();
+    foreach (var p in props)
+    {
+        sb.AppendLine(p.Name + ": " + p.GetValue(obj, null));
+    }
+    return sb.ToString();
+}
+
+var bookToString = DisplayProperties(book);
+
+bookToString
+
+#!csharp
+
+// local function
+public static int Factorial(int number)
+{
+    if (number < 0)
+    {
+        throw new ArgumentException($"{nameof(number)} cannot be less than 0.");
+    }
+    return localFactorial(number);
+
+    int localFactorial(int localNumber)
+    {
+        if (localNumber == 0)
+        {
+            return 1;
+        }
+        return localNumber * localFactorial(localNumber - 1);
+    }
+}
+
+var r = Factorial(7);
+
+r
+
+#!csharp
+
+// pattern matching
+public class Passenger
+{
+    public string Name { get; set; }
+}
+
+public class BusinessClassPassenger : Passenger
+{
+    public override string ToString() { return $"business class: {Name}"; }
+}
+
+public class FirstClassPassenger : Passenger
+{
+    public int AirMiles { get; set; }
+    public override string ToString() { return $"first class with {AirMiles:N0} air miles: {Name}"; }
+}
+
+public class CoachClassPassenger : Passenger
+{
+    public double CarryOnKG { get; set; }
+    public override string ToString() { return $"coach class with {CarryOnKG:N2} KG carry on: {Name}"; }
+}
+
+// ToDo
+
+#!csharp
+
+// records
+public record ImmutableVehicle
+{
+    public int Wheels { get; init; }
+    public string Color { get; init; }
+    public string Brand { get; init; }
+}
+
+ImmutableVehicle car = new()
+{
+    Brand = "mazda mx-5",
+    Color = "red crystal mettalic",
+    Wheels = 4
+};
+
+ImmutableVehicle repaintedCar = car with { Color = "grey polymetal mettalic" };
+
+Console.WriteLine($"original color: {car.Color}, new color: {repaintedCar.Color}");
+
+#!csharp
+
+public record ImmutableAnimal // record - constructor - deconstructor
+{
+    public string Name { get; init; }
+    public string Species { get; init; }
+
+    public ImmutableAnimal(string name, string species)
+    {
+        Name = name;
+        Species = species;
+    }
+
+    public void Deconstruct(out string name, out string species)
+    {
+        name = Name;
+        species = Species;
+    }
+}
+// equals to =>
+public record ImmutableAnimalShort(string Name, string Species);
+
+ImmutableAnimalShort oscar = new(Name: "oscar", Species: "labrador");
+var (who, what) = oscar;
+Console.WriteLine($"{who} is a {what}");
